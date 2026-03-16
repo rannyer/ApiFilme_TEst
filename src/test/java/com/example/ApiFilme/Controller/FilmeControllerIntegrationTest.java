@@ -10,10 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
 import tools.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,7 +28,7 @@ public class FilmeControllerIntegrationTest {
     private FilmeRepository repository;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private tools.jackson.databind.ObjectMapper objectMapper;
 
     @BeforeEach
     void setup(){
@@ -67,5 +67,20 @@ public class FilmeControllerIntegrationTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].titulo").value("Filme 1"))
                 .andExpect(jsonPath("$[1].titulo").value("Filme 2"));
+    }
+    @Test
+    public void deveRetornar404AoDeletarFilmePorIdInexistente() throws Exception {
+        mockMvc.perform(delete("/filmes/999"))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    public void deveDeletarFilmePorId() throws Exception {
+        Filme filme = repository.save(new Filme(null, "Filme 1", "Diretor 1", 2000, "Ação"));
+
+        mockMvc.perform(delete("/filmes/" + filme.getId()))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/filmes/" + filme.getId()))
+                .andExpect(status().isNotFound());
     }
 }
