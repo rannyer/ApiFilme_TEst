@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,5 +50,22 @@ public class FilmeControllerIntegrationTest {
                 .andExpect(jsonPath("$.ano").value(2002))
                 .andExpect(jsonPath("$.genero").value("Fantasia"));
 
+    }
+
+    @Test
+    void deveRetornar404AoBuscarFilmeInexistente() throws Exception {
+        mockMvc.perform(get("/filmes/999")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+    @Test
+    void deveListarTodosOsFilmes() throws Exception{
+        repository.save(new Filme(null, "Filme 1", "Diretor 1", 2000, "Ação"));
+        repository.save(new Filme(null, "Filme 2", "Diretor 2", 2001, "Comédia"));
+
+        mockMvc.perform(get("/filmes")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].titulo").value("Filme 1"))
+                .andExpect(jsonPath("$[1].titulo").value("Filme 2"));
     }
 }
