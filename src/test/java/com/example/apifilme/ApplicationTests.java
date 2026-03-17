@@ -1,4 +1,4 @@
-package com.example.ApiFilme;
+package com.example.apifilme;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
